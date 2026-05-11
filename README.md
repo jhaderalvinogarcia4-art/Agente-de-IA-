@@ -41,3 +41,93 @@ III. Inyección de Dependencias y Bloqueo de Versiones
 ```Powershell 
 uv add pydantic openai
 ```
+
+
+# Arquitectura de Grafos de Estado (Dia 2)
+
+I. Protocolo de Instalación
+
+Instalación de uv
+```
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+II. Inicialización y Aislamiento
+
+```Powershell: Inicialización
+uv init
+```
+
+```Powershell: Creación de Entorno Virtual
+uv venv
+```
+
+
+III. Inyección de Dependencias y Bloqueo de Versiones
+
+```Powershell: Instalación de dependencias core
+uv add pydantic openai langgraph langchain-openai
+```
+
+```Powershell: Bloqueo de versiones
+uv lock
+```
+
+IV. Anatomía del Proyecto
+
+| Archivo         | Nivel Técnico | Función Crítica |
+|----------------|--------------|-----------------|
+| agente_grafo.py | Core         | Implementación de la lógica de grafos y orquestación de nodos. |
+| pyproject.toml  | Config       | Manifiesto de la startup. Define el estándar de ejecución. |
+| uv.lock         | Security     | Garantiza que cada bit del entorno sea idéntico en cualquier máquina. |
+| .gitignore      | DevOps       | Protege el repositorio de archivos binarios y secretos de entorno. |
+
+
+V. Código Fuente Principal (agente_grafo.py)
+```
+import os
+from typing import TypedDict, Literal
+from langgraph.graph import StateGraph, END
+
+// Definición del Estado
+class EstadoAgente(TypedDict):
+    pregunta: str
+    decision: str
+    respuesta: str
+
+// Nodos del Sistema
+def nodo_cerebro(state: EstadoAgente):
+    print("\n[CEREBRO]: Evaluando necesidad de búsqueda...")
+    if len(state["pregunta"]) > 20:
+        return {"decision": "buscador"}
+    return {"decision": "finalizador"}
+
+def nodo_buscador(state: EstadoAgente):
+    print("[BUSCADOR]: Ejecutando herramientas externas...")
+    return {"respuesta": "Dato fresco obtenido (Simulado)."}
+
+def nodo_finalizador(state: EstadoAgente):
+    print("[FINALIZADOR]: Usando conocimiento interno...")
+    return {"respuesta": "Respuesta basada en memoria local."}
+
+// Orquestación del Grafo
+workflow = StateGraph(EstadoAgente)
+workflow.add_node("cerebro", nodo_cerebro)
+workflow.add_node("buscador", nodo_buscador)
+workflow.add_node("finalizador", nodo_finalizador)
+
+workflow.set_entry_point("cerebro")
+
+def router(state: EstadoAgente) -> Literal["buscador", "finalizador"]:
+    return state["decision"]
+
+workflow.add_conditional_edges("cerebro", router)
+workflow.add_edge("buscador", END)
+workflow.add_edge("finalizador", END)
+
+app = workflow.compile()
+
+if __name__ == "__main__":
+    app.invoke({"pregunta": "Necesito saber el precio del Bitcoin ahora mismo"})
+```
+
