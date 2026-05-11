@@ -33,11 +33,11 @@ uv venv
 ```
 
 
+
 III. Inyección de Dependencias y Bloqueo de Versiones
 
-Instalación declarativa de librerías (genera automáticamente uv.lockpara asegurar reproducibilidad):
+#### Instalación de dependencias 
 
-Instalación de dependencias core
-
-Powershell 
+```Powershell 
 uv add pydantic openai
+```
