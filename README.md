@@ -20,15 +20,17 @@ Ejecutar en **PowerShell** desde la raíz del proyecto:
 ####  Instalación de uv
 ```powershell
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
 
-
-Powershell
-Inicialización del proyecto
+#### Inicialización del proyecto
+```Powershell
 uv init
+```
 
-Powershell
-Creación del entorno virtual
+#### Creación del entorno virtual
+```Powershell
 uv venv
+```
 
 
 III. Inyección de Dependencias y Bloqueo de Versiones
