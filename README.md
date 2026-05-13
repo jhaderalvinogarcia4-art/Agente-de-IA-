@@ -146,4 +146,99 @@ if __name__ == "__main__":
     sales_agent.invoke(lead_input)
   ````
 
+# Implementación de Lógica (Dia 3)
+
+Resumen
+En esta fase, el sistema evoluciona de una ejecución secuencial a una arquitectura de grafos con ramificación lógica. Se ha integrado un componente de evaluación (Router) que analiza la carga semántica de la entrada para determinar la ruta de procesamiento más eficiente, optimizando la latencia y el uso de recursos computacionales.
+
+
+VI. Implementación Técnica
+
+````
+from typing import TypedDict, Literal
+from langgraph.graph import StateGraph, END
+
+class AgentState(TypedDict):
+    input_data: str
+    routing_decision: str
+    output: str
+
+def brain_node(state: AgentState):
+    """Analiza la complejidad de la tarea y decide la ruta."""
+    print(f"\n[SISTEMA]: Evaluando complejidad de la tarea...")
+    
+    if len(state["input_data"]) > 35:
+        return {"routing_decision": "deep_process"}
+    return {"routing_decision": "standard_process"}
+
+def deep_processing_node(state: AgentState):
+    """Nodo para tareas que requieren mayor capacidad de cómputo."""
+    print("[NODO_DEEP]: Ejecutando procesamiento de alta intensidad...")
+    return {"output": "Resultado generado mediante análisis profundo."}
+
+def standard_processing_node(state: AgentState):
+    """Nodo para respuestas de baja latencia."""
+    print("[NODO_STD]: Ejecutando procesamiento estándar...")
+    return {"output": "Resultado generado mediante acceso directo."}
+
+
+def build_logic_graph():
+    workflow = StateGraph(AgentState)
+    
+  from typing import TypedDict, Literal
+from langgraph.graph import StateGraph, END
+
+class AgentState(TypedDict):
+    input_data: str
+    routing_decision: str
+    output: str
+
+def brain_node(state: AgentState):
+    """Analiza la complejidad de la tarea y decide la ruta."""
+    print(f"\n[SISTEMA]: Evaluando complejidad de la tarea...")
+    
+    if len(state["input_data"]) > 35:
+        return {"routing_decision": "deep_process"}
+    return {"routing_decision": "standard_process"}
+
+def deep_processing_node(state: AgentState):
+    """Nodo para tareas que requieren mayor capacidad de cómputo."""
+    print("[NODO_DEEP]: Ejecutando procesamiento de alta intensidad...")
+    return {"output": "Resultado generado mediante análisis profundo."}
+
+def standard_processing_node(state: AgentState):
+    """Nodo para respuestas de baja latencia."""
+    print("[NODO_STD]: Ejecutando procesamiento estándar...")
+    return {"output": "Resultado generado mediante acceso directo."}
+
+def build_logic_graph():
+    workflow = StateGraph(AgentState)
+
+    workflow.add_node("brain", brain_node)
+    workflow.add_node("deep_worker", deep_processing_node)
+    workflow.add_node("std_worker", standard_processing_node)
+    
+    workflow.set_entry_point("brain")
+    
+    workflow.add_conditional_edges(
+        "brain",
+        lambda state: state["routing_decision"],
+        {
+            "deep_process": "deep_worker",
+            "standard_process": "std_worker"
+        }
+    )
+    
+    workflow.add_edge("deep_worker", END)
+    workflow.add_edge("std_worker", END)
+    
+    return workflow.compile()
+
+if __name__ == "__main__":
+    agent_system = build_logic_graph()
+    
+    input_test = {"input_data": "Requerimiento complejo de análisis de datos para sistema autónomo"}
+    print("--- INICIANDO SISTEMA LÓGICO ---")
+    agent_system.invoke(input_test)
+```
 
