@@ -84,50 +84,66 @@ IV. Anatomía del Proyecto
 
 
 V. Código Fuente Principal (agente_grafo.py)
-```
-import os
+````
 from typing import TypedDict, Literal
 from langgraph.graph import StateGraph, END
 
-// Definición del Estado
-class EstadoAgente(TypedDict):
-    pregunta: str
-    decision: str
-    respuesta: str
+class SalesState(TypedDict):
+    """Representa el estado del pipeline de ventas."""
+    lead_query: str
+    action_type: str
+    final_offer: str
 
-// Nodos del Sistema
-def nodo_cerebro(state: EstadoAgente):
-    print("\n[CEREBRO]: Evaluando necesidad de búsqueda...")
-    if len(state["pregunta"]) > 20:
-        return {"decision": "buscador"}
-    return {"decision": "finalizador"}
+def qualification_node(state: SalesState):
+    """Evalúa el perfil del lead y decide el flujo de trabajo."""
+    print(f"\n[ANALISTA]: Calificando interés del lead: '{state['lead_query'][:30]}...'")
+    
+    if len(state["lead_query"]) > 30:
+        return {"action_type": "market_research"}
+    return {"action_type": "standard_close"}
 
-def nodo_buscador(state: EstadoAgente):
-    print("[BUSCADOR]: Ejecutando herramientas externas...")
-    return {"respuesta": "Dato fresco obtenido (Simulado)."}
+def research_node(state: SalesState):
+    """Simula la activación de herramientas de búsqueda para leads Premium."""
+    print("[INVESTIGADOR]: Extrayendo datos competitivos y precios actualizados...")
+    return {"final_offer": "Propuesta personalizada basada en datos de mercado actuales."}
 
-def nodo_finalizador(state: EstadoAgente):
-    print("[FINALIZADOR]: Usando conocimiento interno...")
-    return {"respuesta": "Respuesta basada en memoria local."}
+def closing_node(state: SalesState):
+    """Genera una respuesta rápida para leads de alta conversión."""
+    print("[VENDEDOR]: Generando oferta directa con catálogo interno...")
+    return {"final_offer": "Catálogo estándar enviado: Precios fijos y promociones activas."}
 
-// Orquestación del Grafo
-workflow = StateGraph(EstadoAgente)
-workflow.add_node("cerebro", nodo_cerebro)
-workflow.add_node("buscador", nodo_buscador)
-workflow.add_node("finalizador", nodo_finalizador)
+def build_sales_workflow():
+    workflow = StateGraph(SalesState)
 
-workflow.set_entry_point("cerebro")
+    workflow.add_node("qualifier", qualification_node)
+    workflow.add_node("researcher", research_node)
+    workflow.add_node("closer", closing_node)
 
-def router(state: EstadoAgente) -> Literal["buscador", "finalizador"]:
-    return state["decision"]
+    workflow.set_entry_point("qualifier")
 
-workflow.add_conditional_edges("cerebro", router)
-workflow.add_edge("buscador", END)
-workflow.add_edge("finalizador", END)
+    workflow.add_conditional_edges(
+        "qualifier",
+        lambda state: state["action_type"],
+        {
+            "market_research": "researcher",
+            "standard_close": "closer"
+        }
+    )
 
-app = workflow.compile()
+    workflow.add_edge("researcher", END)
+    workflow.add_edge("closer", END)
+
+    return workflow.compile()
 
 if __name__ == "__main__":
-    app.invoke({"pregunta": "Necesito saber el precio del Bitcoin ahora mismo"})
-```
+    sales_agent = build_sales_workflow()
+    
+    lead_input = {
+        "lead_query": "Busco una solución corporativa de IA para 50 empleados en Lima"
+    }
+    
+    print("--- INICIANDO PIPELINE DE VENTAS ---")
+    sales_agent.invoke(lead_input)
+  ````
+
 
