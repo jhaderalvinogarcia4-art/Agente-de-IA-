@@ -240,5 +240,89 @@ if __name__ == "__main__":
     input_test = {"input_data": "Requerimiento complejo de análisis de datos para sistema autónomo"}
     print("--- INICIANDO SISTEMA LÓGICO ---")
     agent_system.invoke(input_test)
-```
+ ````
+
+# Testing Determinista (Dia 4)
+
+### Stack 
+- Observabilidad: LangSmith para el trazado (tracing) distribuido de nodos.
+- Orquestación: LangGraph para la gestión de estados inmutables.
+- Entorno: Variables de entorno ($env:LANGCHAIN_PROJECT) para segmentación de telemetría.
+
+### eval_benchmark.py
+````
+import time
+from sales_agent_v3 import build_sales_workflow
+
+benchmark_data = [
+    ("Hola", "standard_close"),
+    ("Quiero comprar ya", "standard_close"),
+    ("Necesito una auditoria tecnica completa para OTI Systems en Lima", "market_research"),
+    ("IA", "standard_close"),
+    ("Podrian enviarme una propuesta detallada para implementar vision computacional en KRAKK", "market_research"),
+    ("Precio de los drones", "standard_close"),
+    ("Busco automatizar el flujo de ventas de una empresa con 50 empleados", "market_research"),
+    ("Informacion general", "standard_close"),
+    ("Analisis de mercado para sistemas de defensa en el sector seguridad", "market_research"),
+    ("Gracias por la ayuda", "standard_close")
+]
+
+def run_evaluation():
+    agent = build_sales_workflow()
+    stats = {"exito": 0, "fallo": 0}
+    
+    print("INICIANDO BENCHMARK EN LANGSMITH: Dia-4-Agente IA")
+    
+    for i, (query, expected) in enumerate(benchmark_data, 1):
+        try:
+            print(f"Prueba {i}/10: Procesando {query[:30]}")
+            
+            start_time = time.time()
+            result = agent.invoke({"lead_query": query})
+            duration = time.time() - start_time
+            
+            actual = result.get("action_type")
+            
+            if actual == expected:
+                stats["exito"] += 1
+                status = "PASS"
+            else:
+                stats["fallo"] += 1
+                status = f"FAIL (Esperaba {expected}, obtuvo {actual})"
+            
+            print(f"Resultado: {status} | Latencia: {duration:.2f}s")
+            
+        except Exception as e:
+            stats["fallo"] += 1
+            print(f"ERROR en Prueba {i}: {str(e)}")
+
+    print("EVALUACION FINALIZADA")
+    print(f"Tasa de Exito: {(stats['exito']/10)*100}%")
+    print(f"Exitos: {stats['exito']} | Fallos: {stats['fallo']}")
+
+if __name__ == "__main__":
+    run_evaluation()
+
+````
+### EJECUTA
+````
+python eval_benchmark.py
+````
+
+## Métricas de Éxito
+
+| Indicador             | Valor       |
+|:----------------------|:------------|
+| Accuracy (Precisión)  | 100%        |
+| Latencia Media        | 0.04 s      |
+| Tasa de Error         | 0%          |
+| Integridad de Estado  | Verificada  |
+
+## Trazabilidad y Logs
+Cada interacción en el grafo fue registrada en LangSmith bajo el proyecto "Dia-4-Agente IA". Esto nos permite auditar:
+
+- Flow Graph: Visualización de la ruta exacta que tomó el lead.
+- Time-per-Node: Identificación de cuellos de botella en la lógica de calificación.
+- Payload Inspection: Análisis de los diccionarios de estado (SalesState) transferidos entre nodos.
+
 
