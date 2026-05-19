@@ -326,3 +326,80 @@ Cada interacción en el grafo fue registrada en LangSmith bajo el proyecto "Dia-
 - Payload Inspection: Análisis de los diccionarios de estado (SalesState) transferidos entre nodos.
 
 
+#  Arquitectura del Sistema (Día 5)
+
+El sistema opera bajo un flujo de trabajo basado en grafos que permite la **especialización de tareas** y una ejecución modular.
+
+##  Nodos principales
+
+###  NodoNavigator
+- Usa `TavilySearch` o `Playwright`
+- Captura información financiera y contextual en tiempo real
+
+### NodoFinance
+- Analiza precios, métricas y KPIs
+- Usa modelos de lenguaje (`Groq / Llama`)
+
+### NodoSentimiento
+- Analiza noticias, percepción pública y riesgos
+- Detecta señales de mercado
+
+### NodoRedactor
+- Genera el reporte ejecutivo final
+- Integra todos los análisis
+
+---
+
+# Diagrama del Flujo
+
+```text
+[User Input: Empresa/Competidor] 
+                │
+                ▼
+     [Agente 1: El Navegador]
+     (Playwright / Search Tool)
+                │
+     ┌──────────┴──────────┐
+     ▼                     ▼
+[Agente 2: Finanzas]   [Agente 3: Sentimiento]
+ (Precios/Métricas)     (Noticias/Riesgos)
+     └──────────┬──────────┘
+                ▼
+     [Agente 4: El Redactor]
+    (Reporte Ejecutivo Final)
+````
+
+# Día 6: Persistencia y Control
+
+En esta etapa se introduce manejo de estado y control de fallos para mejorar la robustez del sistema.
+
+## Checkpointer
+
+Se implementa persistencia utilizando `MemorySaver`:
+
+- Guarda el estado del grafo en cada ejecución
+- Permite reanudar flujos sin pérdida de contexto
+- Facilita pruebas y depuración
+
+Esto permite que el sistema mantenga continuidad entre ejecuciones.
+
+## Manejo de errores
+
+Se agregan mecanismos básicos de tolerancia a fallos:
+
+- Captura de excepciones en llamadas a APIs (Groq, Tavily)
+- Manejo de respuestas inválidas o incompletas
+- Control de errores de red y timeouts
+
+El objetivo es evitar interrupciones completas del flujo y mantener estabilidad.
+
+## Ejemplo
+
+```python
+from langgraph.checkpoint.memory import MemorySaver
+
+checkpointer = MemorySaver()
+
+graph = workflow.compile(checkpointer=checkpointer)
+
+
