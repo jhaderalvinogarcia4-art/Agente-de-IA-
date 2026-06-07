@@ -401,5 +401,87 @@ from langgraph.checkpoint.memory import MemorySaver
 checkpointer = MemorySaver()
 
 graph = workflow.compile(checkpointer=checkpointer)
+```
+
+
+# Despliegue de Agente IA en Railway
+
+## 1. Configuración en Railway
+
+No necesitas comandos complejos.
+
+1. Entra en https://railway.app e inicia sesión con tu cuenta de GitHub.
+2. Haz clic en **New Project**.
+3. Selecciona **Deploy from GitHub Repo**.
+4. Elige tu repositorio de "Agente IA".
+
+Railway detectará automáticamente que es un proyecto de Python.
+
+---
+
+## 2. Variables de Entorno (Importante)
+
+Railway no utiliza el archivo `.env` local por seguridad. Debes configurarlas manualmente.
+
+1. Dentro de tu proyecto en Railway, ve a la pestaña **Variables**.
+2. Haz clic en **Raw Editor**.
+3. Pega tus claves en este formato:
+```
+GROQ_API_KEY=tu_clave_aqui
+TAVILY_API_KEY=tu_clave_aqui
+LANGCHAIN_API_KEY=tu_clave_aqui
+LANGCHAIN_TRACING_V2=true
+```
+
+4. Haz clic en **Update**.
+
+Railway reiniciará automáticamente el despliegue.
+
+---
+
+## 3. Comando de Inicio (Start Command)
+
+Si Railway no ejecuta tu aplicación automáticamente:
+
+1. Ve a la pestaña **Settings** de tu servicio.
+2. Busca la sección **Deploy**.
+3. En **Start Command**, usa uno de los siguientes:
+
+### Opción 1 (usando uv)
+```
+uv run app.py
+```
+
+### Opción 2 (Python estándar)
+
+```
+ python app.py
+```
+
+---
+
+## 4. Ver Resultados
+
+Una vez que el despliegue esté completo:
+
+- Ve a la pestaña **Deployments** o **Logs** para ver la ejecución en tiempo real.
+- Si tu aplicación expone una API (FastAPI, Flask, etc.), Railway generará una URL pública automáticamente.
+
+Puedes encontrarla en:
+
+**Settings > Domains**
+
+---
+
+## 5. Casos de Uso
+
+- Due diligence automatizado para startups  
+- Inteligencia competitiva para negocios  
+- Análisis de mercado en tiempo real  
+- Generación automática de reportes  
+
+
+
+
 
 
